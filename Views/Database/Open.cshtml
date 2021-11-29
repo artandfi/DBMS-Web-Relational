@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Відкрити БД";
+}
+
+<h4>Відкрити БД</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Open">
+            <div class="form-group">
+                <label class="control-label">Назва</label>
+                <select name="name" class="form-control" asp-items="@ViewBag.DbNames"></select>
+            </div>
+            <br />
+            <div class="form-group">
+                <input type="submit" value="Відкрити" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>

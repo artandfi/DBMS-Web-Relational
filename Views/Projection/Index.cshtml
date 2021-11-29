@@ -1,0 +1,49 @@
+﻿@model DBMS_Web_Relational.Models.Table
+
+@{ 
+    ViewData["Title"] = $"Проекція {Model.Name}";
+}
+
+<h1>Проекція @Model.Name</h1>
+<hr />
+
+<table class="table">
+    <thead>
+        <tr>
+            @foreach (dynamic column in Model.Columns) {
+                <th>
+                    @column.Name (@column.type)
+                </th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Rows.Count; i++) {
+            <tr>
+                @for (int j = 0; j < Model.Columns.Count; j++) {
+                    dynamic column = Model.Columns[j];
+
+                    @if (column.type.Equals("TEXT FILE")) {
+                        <td>
+                            @if (!string.IsNullOrEmpty(Model.Rows[i][j])) {
+                                var row = Model.Rows[i];
+                                string value = row[j];
+                                int asteriskIndex = value.IndexOf('*');
+                                string fileName = $"{Model.Name}-{column.Name}-{row.Id}-{value.Substring(0, asteriskIndex)}";
+
+                                <form method="post" asp-controller="TextFiles" asp-action="Save" asp-route-fileContents="@value">
+                                    <input type="submit" value="@fileName"/>
+                                </form>
+                            }
+                        </td>
+                    }
+                    else {
+                        <td>
+                            @Model.Rows[i][j]
+                        </td>
+                    }
+                }
+            </tr>
+        }
+    </tbody>
+</table>

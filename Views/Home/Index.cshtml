@@ -1,0 +1,90 @@
+﻿@{
+    ViewData["Title"] = "Головна";
+}
+
+<div class="text-center">
+    <h1 class="display-4">DBMS Relational</h1>
+    <p>By Artem Fisunenko, MI-4</p>
+</div>
+
+<table align="center">
+    <tr>
+        <td>
+            <form method="get" asp-controller="Database" asp-action="Create">
+                <input type="submit" class="btn btn-primary btn-lg" style="width:150px" value="Створити БД" />
+            </form>
+        </td>
+        <td></td>
+        <td>
+            <form method="get" asp-controller="Database" asp-action="Open">
+                <input type="submit" class="btn btn-primary btn-lg" style="width:150px" value="Відкрити БД" />
+            </form>
+        </td>
+    </tr>
+</table>
+
+<br />
+
+@if (ViewBag.DbManager.Database != null) {
+    <div class="text-center">
+        <h4><b>@ViewBag.DbManager.Database.Name</b></h4>
+    </div>
+
+    <table class="table" align="center">
+        <thead>
+            <tr>
+                <th>Таблиці</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var tables = ViewBag.DbManager.Database.Tables;
+            }
+            @for (int i = 0; i < tables.Count; i++) {
+                string targetId = "#modal" + i;
+                string modalId = "modal" + i;
+                <tr>
+                    <td>
+                        @tables[i].Name
+                    </td>
+                    <td>
+                        <a asp-controller="Tables" asp-action="Index" asp-route-id="@i">Переглянути</a> |
+                        <a asp-controller="Tables" asp-action="Edit" asp-route-id="@i">Редагувати</a> |
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="@targetId">
+                            Видалити
+                        </button>
+
+                        <div class="modal fade" id="@modalId" tabindex="-1" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Попередження</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body delete-modal-body">
+                                        Ви впевнені, що хочете видалити цю таблицю?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form asp-controller="Tables" asp-action="Delete" asp-route-id="@i">
+                                            <button type="submit" class="btn btn-danger">Так</button>
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Ні</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+    <div class="text-center">
+        <form method="get" asp-controller="Tables" asp-action="Create">
+            <input type="submit" class="btn btn-primary btn-lg" style="width:175px" value="Додати таблицю" />
+        </form>
+    </div>
+}

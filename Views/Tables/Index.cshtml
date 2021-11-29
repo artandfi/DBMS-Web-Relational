@@ -1,0 +1,145 @@
+﻿@model DBMS_Web_Relational.Models.Table
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<h1>@Model.Name</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            @foreach (dynamic column in Model.Columns) {
+                <th>
+                    @column.Name (@column.type)
+                    <input type="checkbox" name="columnIds" value="@column.Id" form="projectionForm"/>
+                </th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Rows.Count; i++) {
+            string targetId = "#modalRow" + i;
+            string modalId = "modalRow" + i;
+            
+            <tr>
+                @for (int j = 0; j < Model.Columns.Count; j++) {
+                    dynamic column = Model.Columns[j];
+
+                    @if (column.type.Equals("TEXT FILE")) {
+                        <td>
+                            @if (!string.IsNullOrEmpty(Model.Rows[i][j])) {
+                                var row = Model.Rows[i];
+                                string value = row[j];
+                                int asteriskIndex = value.IndexOf('*');
+                                string fileName = $"{Model.Name}-{column.Name}-{row.Id}-{value.Substring(0, asteriskIndex)}";
+
+                                <form method="post" asp-controller="TextFiles" asp-action="Save" asp-route-fileContents="@value">
+                                    <input type="submit" value="@fileName"/>
+                                </form>
+                            }
+                        </td>
+                    }
+                    else {
+                        <td>
+                            @Model.Rows[i][j]
+                        </td>
+                    }
+                }
+                <td>
+                    <a asp-controller="Rows" asp-action="Edit" asp-route-tableId="@Model.Id" asp-route-rowId="@i">Редагувати</a> |
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="@targetId">
+                        Видалити
+                    </button>
+
+                    <div class="modal fade" id="@modalId" tabindex="-1" role="dialog" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Попередження</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body delete-modal-body">
+                                    Ви впевнені, що хочете видалити цей рядок?
+                                </div>
+                                <div class="modal-footer">
+                                    <form asp-controller="Rows" asp-action="Delete" asp-route-tableId="@Model.Id" asp-route-rowId="@i">
+                                        <button type="submit" class="btn btn-danger">Так</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Ні</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+
+        <tr>
+            <td></td>
+            @for (int i = 1; i < Model.Columns.Count; i++) {
+                string targetId = "#modalCol" + i;
+                string modalId = "modalCol" + i;
+                <td>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="@targetId">
+                        Видалити
+                    </button>
+
+                    <div class="modal fade" id="@modalId" tabindex="-1" role="dialog" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Попередження</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body delete-modal-body">
+                                    Ви впевнені, що хочете видалити цей стовпчик?
+                                </div>
+                                <div class="modal-footer">
+                                    <form asp-controller="Columns" asp-action="Delete" asp-route-tableId="@Model.Id" asp-route-columnId="@i">
+                                        <button type="submit" class="btn btn-danger">Так</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Ні</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            }
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <tr>
+        <td>
+            <form method="get" asp-controller="Columns" asp-action="Create" asp-route-tableId="@Model.Id">
+                <input type="submit" class="btn btn-primary" value="Додати стовпчик" />
+            </form>
+        </td>
+        <td>&nbsp;</td>
+        @{
+            bool colsExist = Model.Columns.Count > 1;
+            bool rowsExist = Model.Rows.Count > 0;
+            string displayStyleAddRow = colsExist ? "display:block" : "display:none";
+            string displayStyleProjection = colsExist && rowsExist ? "display:block" : "display:none";
+
+        }
+        <td>
+            <form method="get" asp-controller="Rows" asp-action="Create" asp-route-tableId="@Model.Id">
+                <input type="submit" class="btn btn-primary" value="Додати рядок" style="@displayStyleAddRow" />
+            </form>
+        </td>
+        <td>&nbsp;</td>
+        <td>
+            <form method="get" asp-controller="Projection" asp-action="Index" asp-route-tableId="@Model.Id" id="projectionForm">
+                <input type="submit" class="btn btn-primary" value="Проекція" style="@displayStyleProjection" />
+            </form>
+        </td>
+    </tr>
+</table>
